@@ -1,0 +1,16 @@
+{
+  "name": "telegraml-dashboard",
+  "version": "1.0.0",
+  "license": "GPL",
+  "author": { "username": "nv-vn", "email": "nv@cock.li" },
+  "homepage": "https://github.com/nv-vn/telegraml-dashboard",
+  "synopsis":
+    "A set of extensions for TelegraML for automatically generating a web dashboard for your bot",
+  "package_type": [ "Lib", [ "Dashboard" ] ],
+  "dependencies": [
+    { "package_name": "lwt", "constraints": null },
+    { "package_name": "batteries", "constraints": null },
+    { "package_name": "opium", "constraints": null },
+    { "package_name": "telegraml", "constraints": null }
+  ]
+}

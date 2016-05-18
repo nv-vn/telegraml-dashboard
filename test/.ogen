@@ -1,0 +1,13 @@
+{
+  "name": "telegraml-dashboard-test",
+  "version": "1.0.0",
+  "license": "GPL",
+  "author": { "username": "nv-vn", "email": "nv@cock.li" },
+  "homepage": "https://github.com/nv-vn/telegraml-dashboard",
+  "synopsis": "Test project for telegraml-dashboard",
+  "package_type": [ "Exe", "test.ml" ],
+  "dependencies": [
+    { "package_name": "ppx_blob", "constraints": null },
+    { "package_name": "telegraml-dashboard", "constraints": null }
+  ]
+}
