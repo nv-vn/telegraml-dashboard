@@ -52,7 +52,7 @@ module MkDashboard (B : Api.BOT) = struct
       | `Error -> print_endline "Couldn't initialize Opium server, dashboard will not start!"
     end;
     let rec loop () =
-      pop_update () >>= process >>= loop in
+      pop_update ~run_cmds:true () >>= process >>= loop in
     while true do (* Recover from errors if an exception is thrown *)
       try Lwt_main.run (App.start app <&> loop ())
       with _ -> ()

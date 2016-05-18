@@ -4,6 +4,6 @@
 
 S src/
 B _build/src/
-PKG lwt batteries opium telegraml
+PKG opium.unix lwt batteries opium telegraml
 EXT 
 FLG 

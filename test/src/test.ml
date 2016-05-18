@@ -1,6 +1,6 @@
 open Telegram
-open Dashboard
 open Opium.Std
+open TelegramDashboard
 
 module Bot = MkDashboard (struct
     include BotDefaults
@@ -9,7 +9,9 @@ module Bot = MkDashboard (struct
 
     let commands =
       let open Api.Command in
-      [{name="test"; description="Test command"; enabled=false; run = fun _ -> print_endline "testing"; Nothing}]
+      let open Api.Message in
+      let test {chat} = SendMessage (Api.Chat.(chat.id), "Hello", false, None, None) in
+      [{name="test"; description="Test command"; enabled=true; run = test}]
   end)
 
 let () = Bot.run ()

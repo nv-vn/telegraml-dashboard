@@ -14,13 +14,10 @@ build: [
   [make]
 ]
 install: [make "install"]
-remove: ["ocamlfind" "remove" "telegraml-dashboard"]
+remove: ["ocamlfind" "remove" "telegraml-dashboard-test"]
 depends: [
   "ocamlfind" {build}
   "oasis" {build}
-  "opium.unix"
-  "lwt"
-  "batteries"
-  "opium"
-  "telegraml"
+  "ppx_blob"
+  "telegraml-dashboard"
 ]
