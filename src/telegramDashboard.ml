@@ -18,14 +18,16 @@ module MkDashboard (B : Api.BOT) = struct
         | _ -> first_name in
       extract_or_error name_of_user get_me "Unknown user"
 
-    let commands =
+    let list_commands () =
       let string_of_command cmd =
         let open Api.Command in
         let enabled = match cmd.enabled with
           | true -> "Enabled"
           | false -> "Disabled" in
-        "<tr><td>/" ^ cmd.name ^ "</td><td>" ^ cmd.description ^ "</td><td>" ^ enabled ^ "</td></tr>" in
-      let command_table = List.map string_of_command B.commands |> String.concat "" in
+        let button = "<input type=\"submit\" value=\"" ^ enabled ^ "\"/>" in
+        let form = "<form action=\"toggle/" ^ cmd.name ^ "\" method=\"POST\">" ^ button ^ "</form>" in
+        "<tr><td>/" ^ cmd.name ^ "</td><td>" ^ cmd.description ^ "</td><td>" ^ form ^ "</td></tr>" in
+      let command_table = List.map string_of_command commands |> String.concat "" in
       "<table><tr><td>Name</td><td>Description</td><td>Status</td></tr>" ^ command_table ^ "</table>"
 
     let index = get "/" begin fun req ->
@@ -33,8 +35,15 @@ module MkDashboard (B : Api.BOT) = struct
           Printf.sprintf
             "<html><head><title>TelegraML Dashboard</title></head><body>%s\n%s</body></html>"
             username
-            commands in
+            (list_commands ()) in
         `Html html |> respond'
+      end
+
+    let toggle = post "/toggle/:cmd" begin fun req ->
+        let open Api.Command in
+        let cmd = param req "cmd" in
+        List.iter (fun c -> if c.name = cmd then c.enabled <- not c.enabled) commands;
+        redirect' (Uri.of_string "/")
       end
   end
 
@@ -46,7 +55,7 @@ module MkDashboard (B : Api.BOT) = struct
         if log && e <> "Could not get head" then (* Ignore spam *)
           Lwt_io.printl e
         else return () in
-    let app = App.empty |> Web.index in
+    let app = App.empty |> Web.index |> Web.toggle in
     begin match App.run_command' app with
       | `Ok _ | `Not_running -> print_endline "Successfully started Opium server!"
       | `Error -> print_endline "Couldn't initialize Opium server, dashboard will not start!"
