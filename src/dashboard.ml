@@ -37,4 +37,24 @@ module MkDashboard (B : Api.BOT) = struct
         `Html html |> respond'
       end
   end
+
+  let run ?(log=true) () =
+    let open Lwt in
+    let process = function
+      | Api.Result.Success _ -> return ()
+      | Api.Result.Failure e ->
+        if log && e <> "Could not get head" then (* Ignore spam *)
+          Lwt_io.printl e
+        else return () in
+    let app = App.empty |> Web.index in
+    begin match App.run_command' app with
+      | `Ok _ | `Not_running -> print_endline "Successfully started Opium server!"
+      | `Error -> print_endline "Couldn't initialize Opium server, dashboard will not start!"
+    end;
+    let rec loop () =
+      pop_update () >>= process >>= loop in
+    while true do (* Recover from errors if an exception is thrown *)
+      try Lwt_main.run (App.start app <&> loop ())
+      with _ -> ()
+    done
 end

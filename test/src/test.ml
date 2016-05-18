@@ -9,7 +9,7 @@ module Bot = MkDashboard (struct
 
     let commands =
       let open Api.Command in
-      [{name="test"; description="Test command"; enabled=false; run = fun _ -> Nothing}]
+      [{name="test"; description="Test command"; enabled=false; run = fun _ -> print_endline "testing"; Nothing}]
   end)
 
-let () = App.run_command (App.empty |> Bot.Web.index)
+let () = Bot.run ()
