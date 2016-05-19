@@ -3,37 +3,35 @@ open Batteries
 open Opium.Std
 
 module MkDashboard (B : Api.BOT) = struct
-  module B' = struct
-    include B
+  module StringSet = Set.Make (struct
+      open Api.Chat
 
-    module StringSet = Set.Make (struct
-        open Api.Chat
+      type t = chat
 
-        type t = chat
+      let compare {id=id1} {id=id2} = Int.compare id1 id2
+    end)
 
-        let compare {id=id1} {id=id2} = Int.compare id1 id2
-      end)
+  let chats = ref StringSet.empty
 
-    let chats = ref StringSet.empty
+  let get_chats () = StringSet.elements !chats
 
-    let new_chat_member chat member =
-      let open Api.User in
-      if member.username = B.command_postfix then (* Same username *)
-        chats := StringSet.add chat !chats
-      else ();
-      B.new_chat_member chat member
+  include Api.Mk (struct
+      include B
 
-    let left_chat_member chat member =
-      let open Api.User in
-      if member.username = B.command_postfix then (* Same username *)
-        chats := StringSet.remove chat !chats
-      else ();
-      B.left_chat_member chat member
+      let new_chat_member chat member =
+        let open Api.User in
+        if member.username = B.command_postfix then (* Same username *)
+          chats := StringSet.add chat !chats
+        else ();
+        B.new_chat_member chat member
 
-    let get_chats () = StringSet.elements !chats
-  end
-
-  include Api.Mk (B')
+      let left_chat_member chat member =
+        let open Api.User in
+        if member.username = B.command_postfix then (* Same username *)
+          chats := StringSet.remove chat !chats
+        else ();
+        B.left_chat_member chat member
+    end)
 
   module Web = struct
     let extract_or_error f lwt default =
@@ -68,7 +66,7 @@ module MkDashboard (B : Api.BOT) = struct
           | Some title -> title
           | None -> "Unnamed chat" in
         "<tr><td>" ^ id ^ "</td><td>" ^ title ^ "</td></tr>" in
-      let chat_table = List.map string_of_chat (B'.get_chats ()) |> String.concat "" in
+      let chat_table = List.map string_of_chat (get_chats ()) |> String.concat "" in
       "<table><tr><td>Chat ID</td><td>Chat title</td></tr>" ^ chat_table ^ "</table>"
 
     let index = get "/" begin fun req ->
