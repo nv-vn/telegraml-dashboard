@@ -46,36 +46,49 @@ module MkDashboard (B : Api.BOT) = struct
         | _ -> first_name in
       extract_or_error name_of_user get_me "Unknown user"
 
+    let create_submit_button text =
+      Printf.sprintf {|<input type="submit" value="%s"/>|} text
+
+    let create_post_form action fields =
+      Printf.sprintf {|<form action="%s" method="POST">%s</form>|} action fields
+
+    let create_table_row items =
+      {|<tr><td>|} ^ String.concat {|</td><td>|} items ^ {|</td></tr>|}
+
+    let create_table headers rows =
+      let headers' = create_table_row headers
+      and rows' = List.map create_table_row rows |> String.concat "" in
+      Printf.sprintf {|<table>%s%s</table>|} headers' rows'
+
+    let create_document title bodies =
+      Printf.sprintf {|<html><head><title>%s</title></head><body>%s</body></html>|}
+        title
+        (String.concat "" bodies)
+
     let list_commands () =
-      let string_of_command cmd =
+      let row_of_command cmd =
         let open Api.Command in
         let enabled = match cmd.enabled with
           | true -> "Enabled"
           | false -> "Disabled" in
-        let button = "<input type=\"submit\" value=\"" ^ enabled ^ "\"/>" in
-        let form = "<form action=\"toggle/" ^ cmd.name ^ "\" method=\"POST\">" ^ button ^ "</form>" in
-        "<tr><td>/" ^ cmd.name ^ "</td><td>" ^ cmd.description ^ "</td><td>" ^ form ^ "</td></tr>" in
-      let command_table = List.map string_of_command commands |> String.concat "" in
-      "<table><tr><td>Name</td><td>Description</td><td>Status</td></tr>" ^ command_table ^ "</table>"
+        let form = create_post_form ("toggle/" ^ cmd.name) (create_submit_button enabled) in
+        [cmd.name; cmd.description; form] in
+      let command_list = List.map row_of_command commands in
+      create_table ["Name"; "Description"; "Status"] command_list
 
     let list_chats () =
-      let string_of_chat chat =
+      let row_of_chat chat =
         let open Api.Chat in
         let id = string_of_int chat.id
         and title = match chat.title with
           | Some title -> title
           | None -> "Unnamed chat" in
-        "<tr><td>" ^ id ^ "</td><td>" ^ title ^ "</td></tr>" in
-      let chat_table = List.map string_of_chat (get_chats ()) |> String.concat "" in
-      "<table><tr><td>Chat ID</td><td>Chat title</td></tr>" ^ chat_table ^ "</table>"
+        [id; title] in
+      let chat_list = List.map row_of_chat (get_chats ()) in
+      create_table ["Chat ID"; "Chat title"] chat_list
 
     let index = get "/" begin fun req ->
-        let html =
-          Printf.sprintf
-            "<html><head><title>TelegraML Dashboard</title></head><body>%s\n%s\n%s</body></html>"
-            username
-            (list_commands ())
-            (list_chats ()) in
+        let html = create_document username [list_commands (); list_chats ()] in
         `Html html |> respond'
       end
 
