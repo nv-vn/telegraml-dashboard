@@ -3,7 +3,37 @@ open Batteries
 open Opium.Std
 
 module MkDashboard (B : Api.BOT) = struct
-  include Api.Mk (B)
+  module B' = struct
+    include B
+
+    module StringSet = Set.Make (struct
+        open Api.Chat
+
+        type t = chat
+
+        let compare {id=id1} {id=id2} = Int.compare id1 id2
+      end)
+
+    let chats = ref StringSet.empty
+
+    let new_chat_member chat member =
+      let open Api.User in
+      if member.username = B.command_postfix then (* Same username *)
+        chats := StringSet.add chat !chats
+      else ();
+      B.new_chat_member chat member
+
+    let left_chat_member chat member =
+      let open Api.User in
+      if member.username = B.command_postfix then (* Same username *)
+        chats := StringSet.remove chat !chats
+      else ();
+      B.left_chat_member chat member
+
+    let get_chats () = StringSet.elements !chats
+  end
+
+  include Api.Mk (B')
 
   module Web = struct
     let extract_or_error f lwt default =
@@ -30,12 +60,24 @@ module MkDashboard (B : Api.BOT) = struct
       let command_table = List.map string_of_command commands |> String.concat "" in
       "<table><tr><td>Name</td><td>Description</td><td>Status</td></tr>" ^ command_table ^ "</table>"
 
+    let list_chats () =
+      let string_of_chat chat =
+        let open Api.Chat in
+        let id = string_of_int chat.id
+        and title = match chat.title with
+          | Some title -> title
+          | None -> "Unnamed chat" in
+        "<tr><td>" ^ id ^ "</td><td>" ^ title ^ "</td></tr>" in
+      let chat_table = List.map string_of_chat (B'.get_chats ()) |> String.concat "" in
+      "<table><tr><td>Chat ID</td><td>Chat title</td></tr>" ^ chat_table ^ "</table>"
+
     let index = get "/" begin fun req ->
         let html =
           Printf.sprintf
-            "<html><head><title>TelegraML Dashboard</title></head><body>%s\n%s</body></html>"
+            "<html><head><title>TelegraML Dashboard</title></head><body>%s\n%s\n%s</body></html>"
             username
-            (list_commands ()) in
+            (list_commands ())
+            (list_chats ()) in
         `Html html |> respond'
       end
 
