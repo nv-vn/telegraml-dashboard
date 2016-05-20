@@ -34,6 +34,19 @@ module MkDashboard (B : Api.BOT) = struct
     end)
 
   module Web = struct
+    let stylesheet =
+      {css|
+        table {
+          margin: 2px;
+          border-collapse: collapse;
+        }
+
+        tr, td {
+          text-align: left;
+          border: 1px solid #999;
+        }
+      |css}
+
     let extract_or_error f lwt default =
       match Lwt_main.run lwt with
       | Api.Result.Success x -> f x
@@ -61,8 +74,10 @@ module MkDashboard (B : Api.BOT) = struct
       Printf.sprintf {|<table>%s%s</table>|} headers' rows'
 
     let create_document title bodies =
-      Printf.sprintf {|<html><head><title>%s</title></head><body>%s</body></html>|}
+      Printf.sprintf
+        {|<html><head><title>TelegraML Dashboard - %s</title><style>%s</style></head><body>%s</body></html>|}
         title
+        stylesheet
         (String.concat "" bodies)
 
     let list_commands () =
