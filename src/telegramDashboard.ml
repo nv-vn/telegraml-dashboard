@@ -36,14 +36,38 @@ module MkDashboard (B : Api.BOT) = struct
   module Web = struct
     let stylesheet =
       {css|
+        html {
+          padding: 20px;
+          text-align: center;
+          text-size: 200%;
+          font-family: "Arial Black", Gadget, sans-serif;
+        }
+
         table {
+          width: 40%;
           margin: 2px;
           border-collapse: collapse;
         }
 
         tr, td {
-          text-align: left;
           border: 1px solid #999;
+          text-align: center;
+        }
+
+        .toggle {
+          color: #ffffff;
+          margin: 2px;
+          padding: 10px;
+          font-size: 20px;
+          background: #3498db;
+          text-decoration: none;
+          border-style: none;
+        }
+
+        .toggle:hover {
+          background: #3cb0fd;
+          text-decoration: none;
+          border-style: none;
         }
       |css}
 
@@ -60,7 +84,7 @@ module MkDashboard (B : Api.BOT) = struct
       extract_or_error name_of_user get_me "Unknown user"
 
     let create_submit_button text =
-      Printf.sprintf {|<input type="submit" value="%s"/>|} text
+      Printf.sprintf {|<input type="submit" class="toggle" value="%s"/>|} text
 
     let create_post_form action fields =
       Printf.sprintf {|<form action="%s" method="POST">%s</form>|} action fields
@@ -75,7 +99,7 @@ module MkDashboard (B : Api.BOT) = struct
 
     let create_document title bodies =
       Printf.sprintf
-        {|<html><head><title>TelegraML Dashboard - %s</title><style>%s</style></head><body>%s</body></html>|}
+        {|<html><head><title>TelegraML Dashboard - %s</title><style>%s</style></head><body><div align="CENTER">%s</div></body></html>|}
         title
         stylesheet
         (String.concat "" bodies)
