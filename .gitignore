@@ -8,6 +8,9 @@
 *.cmxs
 *.cmxa
 
+# sqlite3 databases
+*.db
+
 # ocamlbuild working directory
 _build/
 

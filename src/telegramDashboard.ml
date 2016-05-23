@@ -29,20 +29,28 @@ module MkDashboard (B : Api.BOT) = struct
 
   let get_chats () = ChatSet.elements !chats
 
+  let add_chat chat =
+    chats := ChatSet.add chat !chats;
+    save_chats !chats
+
+  let remove_chat chat =
+    chats := ChatSet.add chat !chats;
+    save_chats !chats
+
   include Api.Mk (struct
       include B
 
       let new_chat_member chat member =
         let open Api.User in
         if member.username = B.command_postfix then (* Same username *)
-          chats := ChatSet.add chat !chats
+          add_chat chat
         else ();
         B.new_chat_member chat member
 
       let left_chat_member chat member =
         let open Api.User in
         if member.username = B.command_postfix then (* Same username *)
-          chats := ChatSet.remove chat !chats
+          remove_chat chat
         else ();
         B.left_chat_member chat member
     end)
@@ -160,7 +168,7 @@ module MkDashboard (B : Api.BOT) = struct
         let chat_id = int_of_string @@ param req "chat" in
         ignore @@ leave_chat ~chat_id;
         begin match Lwt_main.run @@ get_chat ~chat_id with
-          | Api.Result.Success chat -> chats := ChatSet.remove chat !chats
+          | Api.Result.Success chat -> remove_chat chat
           | Api.Result.Failure _ -> ()
         end;
         redirect' (Uri.of_string "/")

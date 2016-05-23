@@ -11,10 +11,10 @@ let prepare_chat {id; chat_type; title; username; first_name; last_name} =
     | Supergroup -> "supergroup"
     | Channel -> "channel" in
   `Assoc (["id", `Int id;
-           "chat_type", `String chat_type'] +? ("title", this_string <$> title)
-                                            +? ("username", this_string <$> username)
-                                            +? ("first_name", this_string <$> first_name)
-                                            +? ("last_name", this_string <$> last_name))
+           "type", `String chat_type'] +? ("title", this_string <$> title)
+                                       +? ("username", this_string <$> username)
+                                       +? ("first_name", this_string <$> first_name)
+                                       +? ("last_name", this_string <$> last_name))
   |> Yojson.Safe.to_string
 
 let init_database () =
@@ -30,6 +30,6 @@ let init_database () =
 
 let db = init_database ()
 
-let (_, add_chat)  = [%gensqlite db "INSERT INTO chats (chat_info) VALUES %s{chat_info}"]
+let (_, add_chat)  = [%gensqlite db "INSERT INTO chats (chat_info) VALUES (%s{chat_info})"]
 let (_, get_chats) = [%gensqlite db "SELECT @s{chat_info} FROM chats"]
 
