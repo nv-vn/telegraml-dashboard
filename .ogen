@@ -8,6 +8,8 @@
     "A set of extensions for TelegraML for automatically generating a web dashboard for your bot",
   "package_type": [ "Lib", [ "TelegramDashboard" ] ],
   "dependencies": [
+    { "package_name": "gensqlite.ppx", "constraints": null },
+    { "package_name": "gensqlite", "constraints": null },
     { "package_name": "opium.unix", "constraints": null },
     { "package_name": "lwt", "constraints": null },
     { "package_name": "batteries", "constraints": null },

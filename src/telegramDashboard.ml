@@ -11,7 +11,21 @@ module MkDashboard (B : Api.BOT) = struct
       let compare {id=id1} {id=id2} = Int.compare id1 id2
     end)
 
-  let chats = ref ChatSet.empty
+  let save_chats ~chats =
+    let insert chat =
+      let chat_info = DashboardDb.prepare_chat chat in
+      DashboardDb.add_chat ~chat_info () in
+    ChatSet.iter insert chats
+
+  let load_chats () =
+    let chats = DashboardDb.get_chats () in
+    let open Api.Chat in
+    let rec make_set = function
+      | [] -> ChatSet.empty
+      | chat::chats -> ChatSet.add (Yojson.Safe.from_string chat |> read) (make_set chats) in
+    make_set chats
+
+  let chats = ref @@ load_chats ()
 
   let get_chats () = ChatSet.elements !chats
 
@@ -171,5 +185,6 @@ module MkDashboard (B : Api.BOT) = struct
     while true do (* Recover from errors if an exception is thrown *)
       try Lwt_main.run (App.start app <&> loop ())
       with _ -> ()
-    done
+    done;
+    save_chats ~chats:(!chats)
 end

@@ -16,4 +16,4 @@ Library "telegraml-dashboard"
   Path: src/
   Modules: TelegramDashboard
   CompiledObject: best
-  BuildDepends: opium.unix, lwt, batteries, opium, telegraml
+  BuildDepends: gensqlite.ppx, gensqlite, opium.unix, lwt, batteries, opium, telegraml
