@@ -3,7 +3,7 @@ open Batteries
 open Opium.Std
 
 module MkDashboard (B : Api.BOT) = struct
-  module StringSet = Set.Make (struct
+  module ChatSet = Set.Make (struct
       open Api.Chat
 
       type t = chat
@@ -11,9 +11,9 @@ module MkDashboard (B : Api.BOT) = struct
       let compare {id=id1} {id=id2} = Int.compare id1 id2
     end)
 
-  let chats = ref StringSet.empty
+  let chats = ref ChatSet.empty
 
-  let get_chats () = StringSet.elements !chats
+  let get_chats () = ChatSet.elements !chats
 
   include Api.Mk (struct
       include B
@@ -21,14 +21,14 @@ module MkDashboard (B : Api.BOT) = struct
       let new_chat_member chat member =
         let open Api.User in
         if member.username = B.command_postfix then (* Same username *)
-          chats := StringSet.add chat !chats
+          chats := ChatSet.add chat !chats
         else ();
         B.new_chat_member chat member
 
       let left_chat_member chat member =
         let open Api.User in
         if member.username = B.command_postfix then (* Same username *)
-          chats := StringSet.remove chat !chats
+          chats := ChatSet.remove chat !chats
         else ();
         B.left_chat_member chat member
     end)
@@ -83,6 +83,9 @@ module MkDashboard (B : Api.BOT) = struct
         | _ -> first_name in
       extract_or_error name_of_user get_me "Unknown user"
 
+    let create_header text =
+      Printf.sprintf {|<h1>%s</h1>|} text
+
     let create_submit_button text =
       Printf.sprintf {|<input type="submit" class="toggle" value="%s"/>|} text
 
@@ -121,13 +124,14 @@ module MkDashboard (B : Api.BOT) = struct
         let id = string_of_int chat.id
         and title = match chat.title with
           | Some title -> title
-          | None -> "Unnamed chat" in
-        [id; title] in
+          | None -> "Unnamed chat"
+        and leave = create_post_form ("leave/" ^ string_of_int chat.id)  (create_submit_button "Leave") in
+        [id; title; leave] in
       let chat_list = List.map row_of_chat (get_chats ()) in
-      create_table ["Chat ID"; "Chat title"] chat_list
+      create_table ["Chat ID"; "Chat title"; "Leave chat"] chat_list
 
     let index = get "/" begin fun req ->
-        let html = create_document username [list_commands (); list_chats ()] in
+        let html = create_document username [create_header username; list_commands (); list_chats ()] in
         `Html html |> respond'
       end
 
@@ -135,6 +139,16 @@ module MkDashboard (B : Api.BOT) = struct
         let open Api.Command in
         let cmd = param req "cmd" in
         List.iter (fun c -> if c.name = cmd then c.enabled <- not c.enabled) commands;
+        redirect' (Uri.of_string "/")
+      end
+
+    let leave = post "/leave/:chat" begin fun req ->
+        let chat_id = int_of_string @@ param req "chat" in
+        ignore @@ leave_chat ~chat_id;
+        begin match Lwt_main.run @@ get_chat ~chat_id with
+          | Api.Result.Success chat -> chats := ChatSet.remove chat !chats
+          | Api.Result.Failure _ -> ()
+        end;
         redirect' (Uri.of_string "/")
       end
   end
@@ -147,7 +161,7 @@ module MkDashboard (B : Api.BOT) = struct
         if log && e <> "Could not get head" then (* Ignore spam *)
           Lwt_io.printl e
         else return () in
-    let app = App.empty |> Web.index |> Web.toggle in
+    let app = App.empty |> Web.index |> Web.toggle |> Web.leave in
     begin match App.run_command' app with
       | `Ok _ | `Not_running -> print_endline "Successfully started Opium server!"
       | `Error -> print_endline "Couldn't initialize Opium server, dashboard will not start!"
