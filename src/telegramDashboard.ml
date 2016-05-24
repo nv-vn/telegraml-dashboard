@@ -3,6 +3,8 @@ open Batteries
 open Opium.Std
 
 module MkDashboard (B : Api.BOT) = struct
+  let start_time = ODate.Unix.now ()
+
   module ChatSet = Set.Make (struct
       open Api.Chat
 
@@ -152,8 +154,25 @@ module MkDashboard (B : Api.BOT) = struct
       let chat_list = List.map row_of_chat (get_chats ()) in
       create_table ["Chat ID"; "Chat title"; "Leave chat"] chat_list
 
+    let show_uptime () =
+      let diff = ODate.Unix.between (ODate.Unix.now ()) start_time in
+      let fmt =
+        "[%>:[%D:[#=1:tomorrow :[%s:[#>0:in ]]]]]" ^
+        "[%Y:[#>0:# year[#>1:s] ][#=0:" ^
+        "[%M:[#>0:# month[#>1:s] ][#=0:" ^
+        "[%D:[#>1:# day[#>1:s] ][#=0:" ^
+        "[%h:[#>0:# hour[#>1:s] ][#=0:" ^
+        "[%m:[#>0:# minute[#>1:s] ][#=0:" ^
+        "[%s:[#>0:# second[#>1:s] :just now ]" ^
+        "]]]]]]]]]]]" in
+      let printer = match ODuration.To.generate_printer fmt with
+        | Some printer -> printer
+        | None -> ODuration.To.default_printer in
+      let repr = ODuration.To.string printer diff in
+      Printf.sprintf {|<h2>Uptime: %s</h2>|} repr
+
     let index = get "/" begin fun req ->
-        let html = create_document username [create_header username; list_commands (); list_chats ()] in
+        let html = create_document username [create_header username; show_uptime (); list_commands (); list_chats ()] in
         `Html html |> respond'
       end
 

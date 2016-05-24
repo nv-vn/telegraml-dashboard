@@ -4,6 +4,6 @@
 
 S src/
 B _build/src/
-PKG gensqlite.ppx gensqlite opium.unix lwt batteries opium telegraml
+PKG unix odate gensqlite.ppx gensqlite opium.unix lwt batteries opium telegraml
 EXT 
 FLG 

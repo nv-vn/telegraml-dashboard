@@ -6,7 +6,9 @@ A set of extensions for TelegraML for automatically generating a web dashboard f
 * [X] Default "run" function for bots
 * [X] Compatible with normal TelegraML interface
 * [X] Automatically generate a web interface for your bot, including
-  + [ ] Viewing bot info/stats ([X] username, [ ] uptime, [ ] latency, etc.)
+  + [X] Viewing bot info/stats
+    - [X] Username
+    - [X] Uptime
   + [X] Toggling (enabling/disabling) commands
   + [X] Leaving groups
 

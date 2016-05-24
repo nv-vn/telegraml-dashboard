@@ -18,6 +18,8 @@ remove: ["ocamlfind" "remove" "telegraml-dashboard"]
 depends: [
   "ocamlfind" {build}
   "oasis" {build}
+  "unix"
+  "odate"
   "gensqlite.ppx"
   "gensqlite"
   "opium.unix"

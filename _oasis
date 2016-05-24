@@ -14,7 +14,6 @@ Plugins: META (0.4), DevFiles (0.4)
 
 Library "telegraml-dashboard"
   Path: src/
-  Modules: TelegramDashboard
-  InternalModules: DashboardDb
+  Modules: TelegramDashboard, DashboardDb
   CompiledObject: best
-  BuildDepends: gensqlite.ppx, gensqlite, opium.unix, lwt, batteries, opium, telegraml
+  BuildDepends: unix, odate, gensqlite.ppx, gensqlite, opium.unix, lwt, batteries, opium, telegraml

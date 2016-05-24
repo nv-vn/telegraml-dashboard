@@ -6,8 +6,10 @@
   "homepage": "https://github.com/nv-vn/telegraml-dashboard",
   "synopsis":
     "A set of extensions for TelegraML for automatically generating a web dashboard for your bot",
-  "package_type": [ "Lib", [ "TelegramDashboard" ] ],
+  "package_type": [ "Lib", [ "TelegramDashboard", "DashboardDb" ] ],
   "dependencies": [
+    { "package_name": "unix", "constraints": null },
+    { "package_name": "odate", "constraints": null },
     { "package_name": "gensqlite.ppx", "constraints": null },
     { "package_name": "gensqlite", "constraints": null },
     { "package_name": "opium.unix", "constraints": null },
