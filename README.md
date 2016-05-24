@@ -12,6 +12,10 @@ A set of extensions for TelegraML for automatically generating a web dashboard f
   + [X] Toggling (enabling/disabling) commands
   + [X] Leaving groups
 
+## Screenshots
+
+![Dashboard page showing 2 commands and 1 group](/scrots/test.png?raw=true "A basic example dashboard")
+
 ## Porting TelegraML bots
 
 In order to port a bot from standard TelegraML to TelegraML-dashboard, you first need to add the 
