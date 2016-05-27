@@ -8,6 +8,4 @@ module MkDashboard : functor (B : Telegram.Api.BOT) -> sig
     val index : Opium.App.builder
     val toggle : Opium.App.builder
   end
-
-  val run : ?log:bool -> unit -> unit
 end
