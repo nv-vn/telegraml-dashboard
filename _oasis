@@ -3,7 +3,7 @@
 # reverted upon the next run of `ogen`.
 
 Name: telegraml-dashboard
-Version: 1.0.0
+Version: 0.1.0
 Synopsis: A set of extensions for TelegraML for automatically generating a web dashboard for your bot
 Authors: nv-vn <nv@cock.li>
 License: GPL
